@@ -1,0 +1,57 @@
+{{extend 'layout.html'}}
+<h3>Tasks created by me</h3>
+<!-- display the table headers -->
+<table class="statusbar">
+    <tr>
+        <td><h5>Short Description</h5></td>
+        <td><h5>Full Description</h5></td>
+        <td><h5>Assigned To</h5></td>
+        <td><h5>Status</h5></td>
+        <td><h5>Progress</h5></td>
+        <td><h5>Date Created</h5></td>
+        <td><h5>Due Date</h5></td>
+        <td><h5>Update Task</h5></td>
+    </tr>
+<!-- display the files that have been uploaded -->
+{{for task in created_by_me:}}
+    <tr>
+        <td>{{=task.short_description}}</td>
+        <td>{{=task.full_description}}</td>
+        <td>{{=task.assigned_to}}</td>
+        <td>{{=task.status}}</td>
+        <td>{{=task.progress}}</td>
+        <td>{{=task.date_created}}</td>
+        <td>{{=task.due_date}}</td>
+        <td>{{=A('link to task update page', _href=URL('update_task', args=task.id))}}</td>
+    </tr> 
+{{pass}}
+</table>
+
+
+<h3>Tasks assigned to me</h3>
+<!-- display the table headers -->
+<table class="statusbar">
+    <tr>
+        <td><h5>Short Description</h5></td>
+        <td><h5>Full Description</h5></td>
+        <td><h5>Created By</h5></td>
+        <td><h5>Status</h5></td>
+        <td><h5>Progress</h5></td>
+        <td><h5>Date Created</h5></td>
+        <td><h5>Due Date</h5></td>
+        <td><h5>Update Task</h5></td>
+    </tr>
+<!-- display the files that have been uploaded -->
+{{for task in assigned_to_me:}}
+    <tr>
+        <td>{{=task.short_description}}</td>
+        <td>{{=task.full_description}}</td>
+        <td>{{=task.created_by.email}}</td>
+        <td>{{=task.status}}</td>
+        <td>{{=task.progress}}</td>
+        <td>{{=task.date_created}}</td>
+        <td>{{=task.due_date}}</td>
+        <td>{{=A('link to task update page', _href=URL('update_task', args=task.id))}}</td>
+    </tr> 
+{{pass}}
+</table>
