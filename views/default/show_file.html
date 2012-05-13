@@ -1,0 +1,29 @@
+<!-- handles displaying the file formatting -->
+{{if rows:}}
+    <div class="statusbar">
+        <table>
+        {{for row in rows:}}
+            <tr>
+                <td>File Name: </td>
+                <td>{{=row.file_name}}</td>
+            </tr>
+            <tr>
+                <td>File Description: </td>
+                <td>{{=row.description}}</td>
+            </tr>
+            <tr>
+                <td>Posted On: </td>
+                <td>{{=row.posted_on}}</td>
+            </tr>
+            <tr>
+                <td>Posted By: </td>
+                <td>{{=row.posted_by.email}}</td>
+            </tr>
+            <tr>
+                <td>Download Link: </td>
+                <td>{{=A('download', _href=URL('download', args=row.file))}}</td>     
+            </tr>
+        {{pass}}
+        </table>
+    </div>
+{{pass}}

@@ -1,16 +1,17 @@
-{{extend 'layout.html'}}
-<h3>Tasks created by me</h3>
+{{extend 'mylayout.html'}}
+<div class=title><h2>Tasks created by me</h2></div>
 <!-- display the table headers -->
+<p>
 <table class="statusbar">
     <tr>
-        <td><h5>Short Description</h5></td>
-        <td><h5>Full Description</h5></td>
-        <td><h5>Assigned To</h5></td>
-        <td><h5>Status</h5></td>
-        <td><h5>Progress</h5></td>
-        <td><h5>Date Created</h5></td>
-        <td><h5>Due Date</h5></td>
-        <td><h5>Update Task</h5></td>
+        <td><h3>Short Description</h3></td>
+        <td><h3>Full Description</h3></td>
+        <td><h3>Assigned To</h3></td>
+        <td><h3>Status</h3></td>
+        <td><h3>Progress</h3></td>
+        <td><h3>Date Created</h3></td>
+        <td><h3>Due Date</h3></td>
+        <td><h3>Task Page</h3></td>
     </tr>
 <!-- display the files that have been uploaded -->
 {{for task in created_by_me:}}
@@ -22,24 +23,25 @@
         <td>{{=task.progress}}</td>
         <td>{{=task.date_created}}</td>
         <td>{{=task.due_date}}</td>
-        <td>{{=A('link to task update page', _href=URL('update_task', args=task.id))}}</td>
+        <td>{{=A('link to task page', _href=URL('task', args=task.id))}}</td>
     </tr> 
 {{pass}}
 </table>
-
-
-<h3>Tasks assigned to me</h3>
+</p>
+<br>
+<div class=title><h2>Tasks assigned to me</h2></div>
 <!-- display the table headers -->
+<p>
 <table class="statusbar">
     <tr>
-        <td><h5>Short Description</h5></td>
-        <td><h5>Full Description</h5></td>
-        <td><h5>Created By</h5></td>
-        <td><h5>Status</h5></td>
-        <td><h5>Progress</h5></td>
-        <td><h5>Date Created</h5></td>
-        <td><h5>Due Date</h5></td>
-        <td><h5>Update Task</h5></td>
+        <td><h3>Short Description</h3></td>
+        <td><h3>Full Description</h3></td>
+        <td><h3>Created By</h3></td>
+        <td><h3>Status</h3></td>
+        <td><h3>Progress</h3></td>
+        <td><h3>Date Created</h3></td>
+        <td><h3>Due Date</h3></td>
+        <td><h3>Update Task</h3></td>
     </tr>
 <!-- display the files that have been uploaded -->
 {{for task in assigned_to_me:}}
@@ -55,3 +57,4 @@
     </tr> 
 {{pass}}
 </table>
+</P>

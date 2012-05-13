@@ -1,0 +1,13 @@
+<!-- include layout -->
+{{extend 'mylayout.html'}}
+
+<!--- Check for permissions before displaying information --->
+{{if allowed_access:}}
+    <div class=title><h2>Upload a File to the Task</h2></div>
+    <!-- display the form to upload a file -->
+    <p>
+    {{=form}}
+    </p>
+{{else:}}
+    <p>You do not have authorization to view this page.</P>
+{{pass}}

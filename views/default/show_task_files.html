@@ -1,0 +1,20 @@
+<!--- Handles displaying file upload form --->
+{{if my_uploads:}}
+<table class="statusbar">
+        <!--- display headers ---><tr>
+            <td><h3>Name:</h3></td>
+            <td><h3>Description:</h3></td>
+            <td><h3>Posted On:</h3></td>
+            <td><h3>Download:</h3></td>
+        </tr>
+    <!-- display the files that have been uploaded -->
+    {{for upload in my_uploads:}}
+        <tr>
+            <td>{{=upload.file_name}}</td>
+            <td>{{=upload.description}}</td>
+            <td>{{=upload.posted_on}}</td>
+            <td>{{=A('download', _href=URL('download', args=upload.file))}}</td>
+        </tr> 
+    {{pass}}
+</table>
+{{pass}}

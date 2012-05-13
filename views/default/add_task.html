@@ -1,7 +1,15 @@
-{{extend 'layout.html'}}
+<!--- include layout --->
+{{extend 'mylayout.html'}}
 
+<!--- if there is a message, display it--->
 {{if 'message' in globals():}}
     <h3>{{=message}}</h3>
 {{pass}}
 
+<!--- display the form --->
+{{if 'form' in globals():}}
+<p>
+<div class=title><h2>Add a Task</h2></div>
 {{=form}}
+</p>
+{{pass}}

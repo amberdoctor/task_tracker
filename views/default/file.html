@@ -1,0 +1,36 @@
+<!-- include layout -->
+{{extend 'mylayout.html'}}
+
+<!--- if there is a message, display it --->
+{{if 'message' in globals():}}
+    {{include 'default/show_message.html'}}
+{{pass}}
+
+<!--- Check permissions before displaying information --->
+{{if allowed_access:}}
+
+    <div class=title><h2>File</h2></div>
+    <!-- define the URL of the current file being displayed -->
+    {{current_url = URL('file', host=host_defined, scheme='https', args=file_id)}}
+    
+    <!-- display message with the link to current file being displayed -->
+    <h3>Use the following link to share this file with permitted users:</h3>
+    <p>{{=A(current_url, _href=current_url)}}</p>
+    
+    <!-- include file information -->
+    {{if 'rows' in globals():}}
+        <p>
+        {{include 'default/show_file.html'}}
+        </p>
+    {{pass}}
+    
+    <!-- display button to make a comment on the current file -->
+    
+<div class=title><h2>Comments</h2></div>
+    <a class="button pill"href="{{=URL('comment',args=file_id)}}">Post A Comment</a>
+    
+    <!-- include all comments that have been made about this file -->
+    {{if 'comments' in globals():}} 
+        {{include 'default/show_comment.html'}}
+    {{pass}}
+{{pass}}

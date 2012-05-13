@@ -29,7 +29,7 @@
              {{pass}}
       {{pass}}
       <h3>
-	{{=A("%s.%s" % (db,table),_href=URL('select',args=[db],vars=dict(query=qry)))}}
+    {{=A("%s.%s" % (db,table),_href=URL('select',args=[db],vars=dict(query=qry)))}}
       </h3>
       [ {{=A(str(T('insert new'))+' '+table,_href=URL('insert',args=[db,table]))}} ]
     <br /><br />

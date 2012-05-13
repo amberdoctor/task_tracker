@@ -1,0 +1,10 @@
+<!-- handles displaying task comments formatting -->
+{{if comments:}}
+    {{for comment in comments:}}
+        <div class="statusbar">
+            <h3>{{=comment.tc_posted_by.email}} writes:</h3>
+            <p>{{=comment.task_comment_text}}<br>
+            Posted on: {{=comment.tc_posted_on}}</p>
+        </div>
+    {{pass}}
+{{pass}}

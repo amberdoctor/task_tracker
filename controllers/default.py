@@ -1,26 +1,138 @@
 # -*- coding: utf-8 -*-
-# this file is released under public domain and you can use without limitations
 
 #########################################################################
-## This is a samples controller
-## - index is the default action of any application
 ## - user is required for authentication and authorization
 ## - download is for downloading files uploaded in the db (does streaming)
 ## - call exposes all registered services (none by default)
 #########################################################################
+import datetime
 
 def index():
     """
-    example action using the internationalization operator T and flash
-    rendered by views/default/index.html or views/generic.html
+    Defines main landing page.
     """
-    response.flash = "Welcome to web2py!"
-    return dict(message=T('Hello World'))
+    return locals()
+    
+def error():
+    """
+    Defines an error page.
+    """
+    return locals()
+    
+#FILE SHARING SECTION
+        
+@auth.requires_login()
+def upload():
+    """
+    Allows authenticated user to upload a file.
+    Uploaded files generate a link that enables the user to share the file.
+    """
+    db.file_share.access_permitted_to_tasks.readable=False
+    db.file_share.access_permitted_to_tasks.writable=False
+    form = SQLFORM(db.file_share).process()
+    if form.accepted:
+        response.flash = "Your file was uploaded"
+        uploaded_file_id = form.vars.id
+        uploaded_file_url = URL('file', host='host_defined', scheme='https', args=uploaded_file_id)
+        uploaded_file_link = A(uploaded_file_url, _href=uploaded_file_url)
+        my_files_url = A('my files', _href=URL('my_files'))
+        message = DIV('Use this URL to share your file with users that you assigned permissions to:',BR(),uploaded_file_link,BR(),BR(),'You can view and manage all files that you have uploaded at ', my_files_url,'.')
+    return locals()
+    
+@auth.requires_login()
+def upload_to_task():
+    """
+    Allows authenticated user to upload a file to a specified task.
+    Uploaded files generate a link that enables the user to share the file.
+    """
+    allowed_access = False
+    task_id = request.args(0)
+    task = db.task(id=task_id) or redirect(URL('error'))
+    db.file_share.access_permitted_to_tasks.readable=False
+    db.file_share.access_permitted_to_tasks.writable=False
+    db.file_share.access_permitted_to_tasks.default=task.id
+    if (task.created_by==auth.user.id or task.assigned_to==auth.user.email):
+        form = SQLFORM(db.file_share).process()
+        allowed_access = True
+        if form.accepted:
+            session.flash = "Your file was uploaded"
+            redirect(URL('task',args=task_id))
+    return locals()
+
+@auth.requires_login()
+def my_files():
+    """
+    Allows viewing all files posted by the current authenticated user.
+    """
+    my_uploads = db(db.file_share.posted_by==auth.user.id).select(db.file_share.ALL, orderby=~db.file_share.posted_on)
+    shared_uploads = db(db.file_share.access_permitted_to.contains(auth.user.email)).select(db.file_share.ALL, orderby=~db.file_share.posted_on)
+    return locals()
+
+@auth.requires_login()
+def file():
+    """
+    Allows viewing file details and allows downloading an uploaded file.
+    URL must include the id of the file as an arg
+    """
+    allowed_access = False
+    file_id = request.args(0)
+    file = db.file_share(id=file_id) or redirect(URL('error_file'))
+    if (file.posted_by==auth.user.id):
+        rows = db(db.file_share.id==file.id).select()
+        comments = db(db.comment.response_to==file_id).select()
+        allowed_access = True
+    elif file.access_permitted_to:
+        if (auth.user.email in file.access_permitted_to):
+            rows = db(db.file_share.id==file.id).select()
+            comments = db(db.comment.response_to==file_id).select()
+            allowed_access = True
+    else:
+        message = "You do not have access to this file."
+    return locals()
+
+@auth.requires_login()
+def comment():
+    """
+    Allows user to comment on an uploaded file.  
+    URL must include the id of the file as an arg.
+    """
+    allowed_access = False
+    file_id = request.args(0)
+    file = db.file_share(id=file_id) or redirect(URL('error'))
+    if (file.posted_by==auth.user.id):
+        rows = db(db.file_share.id==file.id).select()
+        db.comment.response_to.default = file_id
+        form = SQLFORM(db.comment).process()
+        allowed_access = True
+        if form.accepted:
+            session.flash = "Your comment was posted"
+            redirect(URL('file',args=file_id))
+    elif file.access_permitted_to:
+        if (auth.user.email in file.access_permitted_to):
+            rows = db(db.file_share.id==file.id).select()
+            db.comment.response_to.default = file_id
+            form = SQLFORM(db.comment).process()
+            allowed_access = True
+            if form.accepted:
+                session.flash = "Your comment was posted"
+                redirect(URL('file',args=file_id))
+    return locals()
+
+
+
+
+
+
+
+
+
+
+# TASK SECTION
 
 @auth.requires_login()
 def my_tasks():
     """
-    defines two tables
+    creates two tables
     created_by_me are tasks that the logged in user created
     assigned_to_me are tasks that the logged in user was assigned by another user or by themself
     """
@@ -32,15 +144,65 @@ def my_tasks():
 @auth.requires_login()
 def add_task():
     """
+    Allows the adding of a task by authenticated users
     """
     form = SQLFORM(db.task).process()
     if form.accepted:
         response.flash = "Task Added"
         my_tasks_url = A('my tasks', _href=URL('my_tasks'))
         message = DIV('Task was added.  You may review your task at ', my_tasks_url,'.')
+        """
+        To notify the person listed in the assigned_to category
+        """
+        email_task_url = URL('my_tasks', host=host_defined, scheme='https')
+        assigned_to_message = 'A new task was assigned to you.  You may review your tasks at: ' + str(email_task_url) + '.'
+        created_by_message = 'A new task was created by you.  You may review your tasks at: ' + str(email_task_url) + '.'
+        reminder_message = 'Task Reminder Notification.  You have a task that is due soon.  You may review your tasks at: ' + str(email_task_url) + '.'
+        ## email notification of task creation to the assignee
+        db.email.insert(email_to=form.vars.assigned_to, 
+                        email_subject='A new task was assigned to you.', 
+                        email_message=assigned_to_message)
+        ## email reminder of task to the assignee
+        db.email.insert(email_to=form.vars.assigned_to, 
+                        email_subject='Task Reminder', 
+                        email_message=reminder_message,
+                        email_send_date=form.vars.due_date - datetime.timedelta(days=1))
+        ## email notification of task creation to the creator
+        db.email.insert(email_to=form.vars.created_by, 
+                        email_subject='You created a new task.', 
+                        email_message=created_by_message)
+        ## email reminder of task to the creator          
+        db.email.insert(email_to=form.vars.created_by, 
+                        email_subject='Task Reminder', 
+                        email_message=reminder_message,
+                        email_send_date=form.vars.due_date - datetime.timedelta(days=1))
     return locals()
-    
+
+@auth.requires_login()
+def task():
+    """
+    Allows viewing task details and allows downloading a task.
+    URL must include the id of the file as an arg
+    """
+    allowed_access = False
+    task_id = request.args(0)
+    task = db.task(id=task_id) or redirect(URL('error'))
+    if (task.created_by==auth.user.id or task.assigned_to==auth.user.email):
+        tasks = db(db.task.id==task_id).select()
+        comments = db(db.task_comment.tc_response_to==task_id).select()
+        my_uploads = db(db.file_share.access_permitted_to_tasks.contains(task_id)).select(db.file_share.ALL,    
+                    orderby=~db.file_share.posted_on)
+        allowed_access = True      
+    else:
+        message = "You do not have access to this task."
+    return locals()
+
+@auth.requires_login()
 def update_task():
+    """
+    Allows a user to update a task they have permissions for.
+    """
+
     """
     First grab the task id from the args
     Then check if the task exists in the database
@@ -51,13 +213,9 @@ def update_task():
     Create the update form
    
     """
-    
     task_id = request.args(0)
     task = db.task(id=task_id) or redirect(URL('task_not_found'))
-    
-    
-
-
+    task_url = URL('update_task', host='host_defined', scheme='https', args=task_id)
     """
     Set permissions based on user authentication
     """
@@ -98,36 +256,48 @@ def update_task():
         message = 'You do not have permission to see this task.'
         
         
-    if (task.created_by==auth.user.id):
-        form = SQLFORM(db.task, task, deletable=True).process()
-        
-    elif (task.assigned_to==auth.user.email):
+    if (task.created_by==auth.user.id or (task.assigned_to==auth.user.email)):
         form = SQLFORM(db.task, task).process()
-
-    if form.accepted:
-        response.flash = 'Task was Updated.'
-        redirect(URL('my_tasks'))   
-
+        previous_assigned_to = task.assigned_to 
+        if form.accepted:
+            response.flash = 'Task was Updated.'
+            updated_message = 'The following task was updated: ' + str(task_url) + '.'
+            #email notice that a task has been updated
+            db.email.insert(email_to=form.vars.assigned_to,
+                             email_subject='A task assigned to you was updated.', 
+                             email_message=updated_message)
+            #email notice that a task has been updated
+            db.email.insert(email_to=task.created_by.email,
+                             email_subject='A task you created was updated.', 
+                             email_message=updated_message)
+            if (form.vars.assigned_to!=previous_assigned_to):
+                reassigned_message = 'The following task is no longer assigned to you: ' + task.short_description + '  Full Description: ' + task.full_description + '  If you were not the creator of this task, you will no longer be able to view it.'
+                #email notice that a task has been updated
+                db.email.insert(email_to=previous_assigned_to, 
+                                email_subject='A task assigned to you was reassigned.', 
+                                email_message=reassigned_message)
+            redirect(URL('my_tasks'))           
     return locals()
     
-    
 
-
-    
-"""
-What do I need?
-Need a page for people to track their tasks - two parts - ones they create - ones assigned to them
-So I need a controller that pulls items that they wrote
-And a controller that pulls items that they were assigned
-Maybe make these two separate pages and then also have the main page with both
-
-Need a page to add a new task
-The page for people to track their tasks should have a button to add a new task 
-Maybe put that new task button in a defined side bar
-
-"""
-
-
+@auth.requires_login()
+def task_comment():
+    """
+    Allows user to comment on an task.  
+    URL must include the id of the file as an arg.
+    """
+    allowed_access = False
+    task_id = request.args(0)
+    task = db.task(id=task_id) or redirect(URL('error'))
+    if (task.created_by==auth.user.id or task.assigned_to==auth.user.email):
+        tasks = db(db.task.id==task.id).select()
+        db.task_comment.tc_response_to.default = task_id
+        form = SQLFORM(db.task_comment).process()
+        allowed_access = True
+        if form.accepted:
+            session.flash = "Your comment was posted"
+            redirect(URL('task',args=task_id))
+    return locals()
 
 
 def user():

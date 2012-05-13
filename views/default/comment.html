@@ -1,0 +1,23 @@
+<!-- include layout -->
+{{extend 'mylayout.html'}}
+
+<!--- Check permissions before displaying information --->
+{{if allowed_access:}}
+    <!-- include information about the file being commented on -->
+    {{if 'rows' in globals():}}
+        <div class=title><h2>Task to Comment on</h2></div>
+        <p>
+        {{include 'default/show_file.html'}}
+        </p>
+    {{pass}}
+    
+    <!-- display the form to add a comment -->
+    {{if 'form' in globals():}}
+    <div class=title><h2>Post a Comment</h2></div>
+    <p>
+    {{=form}}
+    </p>
+    {{pass}}
+{{else:}}
+    <p>You do not have authorization to view the requested page.</p>
+{{pass}}

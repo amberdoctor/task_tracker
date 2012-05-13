@@ -1,0 +1,10 @@
+<!-- handles displaying comments formatting -->
+{{if comments:}}
+    {{for comment in comments:}}
+        <div class="statusbar">
+            <h3>{{=comment.posted_by.email}} writes:</h3>
+            <p>{{=comment.comment_text}}<br>
+            Posted on: {{=comment.posted_on}}</p>
+        </div>
+    {{pass}}
+{{pass}}

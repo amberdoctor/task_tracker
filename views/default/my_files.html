@@ -1,0 +1,23 @@
+<!-- include layout -->
+{{extend 'mylayout.html'}}
+
+<!-- display the files -->
+<div class=title><h2>My Uploaded Files</h2></div>
+<p>
+{{if 'my_uploads' in globals():}}
+    {{include 'default/show_files.html'}}
+<!-- there aren't any files message -->
+{{else:}}
+    <h5>You do not have any files.</h5>
+{{pass}}
+</P>
+<br>
+<!-- display the files -->
+<div class=title><h2>Files Shared with Me</h2></div>
+<p>{{if 'shared_uploads' in globals():}}
+    {{include 'default/show_files.html'}}
+<!-- there aren't any files message -->
+{{else:}}
+    <h5>You do not have any files.</h5>
+{{pass}}
+</P>

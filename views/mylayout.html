@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+This template was adapated to web2py by Amber Doctor 
+The CSS design was adapted from:
+Design by Free CSS Templates
+http://www.freecsstemplates.org
+Released for free under a Creative Commons Attribution 2.5 License
+
+Name       : Abundant
+Description: A two-column, fixed-width design for 1024x768 screen resolutions.
+Version    : 1.0
+Released   : 20090703
+
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>{{=response.title}}</title>
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<link href="{{=URL('static', 'plugin_layout_abundant/style.css')}}" rel="stylesheet" type="text/css" media="screen" />
+{{include 'web2py_ajax.html'}}
+</head>
+<body>
+<div id="wrapper">
+
+    <div id="header">
+        <div id="menu">
+            {{=MENU(response.menu)}}
+        </div>
+        <!-- end #menu -->
+    </div>
+    <!-- end #header -->
+    <div id="logo">
+        <h1><a href="{{=URL('default','index')}}">{{=response.title}}</a></h1>
+        <p><em><a href="{{=URL('default','index')}}">{{=response.subtitle}}</a></em></p>
+    </div>
+    <hr />
+    <!-- end #logo -->
+<!-- end #header-wrapper -->
+
+<div id="page">
+    <div id="content">
+        <div class="post">
+            {{include}}
+        </div>
+        
+    </div>
+    <!-- end #content -->
+    <div id="sidebar">
+        <div class="flash">{{=response.flash or ''}}</div>
+        <ul>
+            <li>
+                <h2>Profile</h2>
+                <p>{{=auth.navbar()}}</p>
+            </li>
+        </ul>
+    </div>
+    <!-- end #sidebar -->
+    <div style="clear: both;">&nbsp;</div>
+</div>
+<!-- end #page -->
+</div>
+
+<div id="footer">{{block "footer"}}
+    <p>Copyright (c) 2012 {{=response.title}}. All rights reserved. CSS design by <a href="http://www.freecsstemplates.org/">Free CSS Templates</a>. Design adapted to <a href="http://www.web2py.com/">Web2py</a> by Amber Doctor.</p>
+    {{pass}}
+</div>
+<!-- end #footer -->
+</body>

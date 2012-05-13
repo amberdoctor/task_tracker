@@ -1,0 +1,14 @@
+<!-- include layout -->
+{{extend 'mylayout.html'}}
+
+<div class=title><h2>Upload a File</h2></div>
+<!-- display the message generated when a file has been uploaded -->
+<p>
+{{if 'message' in globals():}}
+    {{include 'default/show_message.html'}}
+{{pass}}
+</P>
+<p>
+<!-- display the form to upload a file -->
+{{=form}}
+</P>

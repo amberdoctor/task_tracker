@@ -1,0 +1,27 @@
+<!-- handles displaying a multiple file formatting -->
+<!-- allows for more than one naming convention to be passed in by first renaming it before using it--->
+{{if shared_uploads:}}
+    {{my_uploads = shared_uploads}}
+{{pass}}
+{{if my_uploads:}}
+<table class="statusbar">
+        <!-- display the headers -->
+        <tr>
+            <td><h3>Name</h3></td>
+            <td><h3>Description</h3></td>
+            <td><h3>Posted On</h3></td>
+            <td><h3>Download</h3></td>
+            <td><h3>File Page</h3></td>
+        </tr>
+    <!-- display the files that have been uploaded -->
+    {{for upload in my_uploads:}}
+        <tr>
+            <td>{{=upload.file_name}}</td>
+            <td>{{=upload.description}}</td>
+            <td>{{=upload.posted_on}}</td>
+            <td>{{=A('download', _href=URL('download', args=upload.file))}}</td>
+            <td>{{=A('link to file page', _href=URL('file', args=upload.id))}}</td>
+        </tr> 
+    {{pass}}
+</table>
+{{pass}}

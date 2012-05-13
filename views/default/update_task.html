@@ -1,13 +1,21 @@
-{{extend 'layout.html'}}
+<!-- include layout -->
+{{extend 'mylayout.html'}}
 
+<!-- if there's a mesage, display message -->
 {{if 'message' in globals():}}
-    <h4>{{=message}}</h4>
+    <div class=title ><h2>{{=message}}</h2></div>
 {{pass}}
 
+<!-- if this form was passed display it, display form-->
+<p>
 {{if 'rows' in globals():}}
     {{=rows}}
 {{pass}}
+</P>
 
+<!-- if this form was passed display it, display form-->
+<p>
 {{if 'form' in globals():}}
     {{=form}}
 {{pass}}
+</p>

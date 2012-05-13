@@ -1,0 +1,43 @@
+<!-- include layout -->
+{{extend 'mylayout.html'}}
+
+<!--- if there is a message, display the message --->
+{{if 'message' in globals():}}
+    {{include 'default/show_message.html'}}
+{{pass}}
+
+<!--- check for permission before displaying information --->
+{{if allowed_access:}}
+    
+    <div class=title><h2>Task Information:</h2></div>
+    <!-- include task information -->
+    <p>
+    {{if 'tasks' in globals():}}
+        {{include 'default/show_task.html'}}
+    {{pass}}
+    </P>
+    
+<br>
+    <!-- display button to upload a file to the current task -->
+    <div class=title><h2>Files:</h2></div>
+    <h3><a href="{{=URL('upload_to_task',args=task_id)}}">Upload a File to this Task</a></h3>
+    <p>
+    <!-- include all files that have given this task access to -->
+    {{if 'my_uploads' in globals():}}
+        {{include 'default/show_task_files.html'}}
+    {{pass}}
+    </P>
+    <br>
+        
+    
+    <!-- display button to make a comment on the current task -->
+    <div class=title><h2>Comments:</h2></div>
+    <h3><a href="{{=URL('task_comment',args=task_id)}}">Post A Comment</a></h3>
+    
+    <!-- include all comments that have been made about this task -->
+    <p>
+    {{if 'comments' in globals():}} 
+        {{include 'default/show_task_comment.html'}}
+    {{pass}}
+    </p>
+{{pass}}
