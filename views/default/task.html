@@ -1,10 +1,39 @@
 <!-- include layout -->
 {{extend 'mylayout.html'}}
+<link href="{{=URL('static', 'ajax_upload/fileuploader.css')}}" rel="stylesheet" type="text/css">
+<script src="{{=URL('static', 'ajax_upload/fileuploader.js')}}" type="text/javascript"></script>
+
+
+<script>
+    jQuery(document).ready(function(){
+        jQuery('#divcomment').hide();
+        jQuery('#divfile').hide();
+        jQuery("input[name$='fileorcomment']").click(function(){
+            var radiochecked = jQuery(this).val();
+            jQuery('#divcomment').hide('fast');
+            jQuery('#divfile').hide('fast');
+            jQuery('#'+radiochecked).show('slow');
+        });
+        jQuery('#formcomment').submit(function(){
+            ajax('{{=URL('task_comment_ajax', args=task_id)}}',
+            ['task_comment_text'], 'target');
+            resetForm($('#formcomment'));
+            jQuery.get('{{=URL('show_task_comment', args=task_id)}}', function (data) {
+                               jQuery('#show_task_comment').replaceWith(data);
+                               })
+            return false;
+        });
+        
+        
+    });
+</script>
 
 <!--- if there is a message, display the message --->
 {{if 'message' in globals():}}
     {{include 'default/show_message.html'}}
 {{pass}}
+
+
 
 <!--- check for permission before displaying information --->
 {{if allowed_access:}}
@@ -17,27 +46,113 @@
     {{pass}}
     </P>
     
-<br>
-    <!-- display button to upload a file to the current task -->
-    <div class=title><h2>Files:</h2></div>
-    <h3><a href="{{=URL('upload_to_task',args=task_id)}}">Upload a File to this Task</a></h3>
-    <p>
-    <!-- include all files that have given this task access to -->
-    {{if 'my_uploads' in globals():}}
-        {{include 'default/show_task_files.html'}}
-    {{pass}}
-    </P>
     <br>
-        
-    
-    <!-- display button to make a comment on the current task -->
-    <div class=title><h2>Comments:</h2></div>
+
+    <!-- Add files or comments -->
+    <div class=title><h2>Add Comments or Files</h2></div>
+    <h3><div id="target"></div></h3>
+    <h3><a href="{{=URL('upload_to_task',args=task_id)}}">Upload a File to this Task</a></h3>
     <h3><a href="{{=URL('task_comment',args=task_id)}}">Post A Comment</a></h3>
     
+    <div>
+        <p> Choose: 
+        <input type="radio" name="fileorcomment" value="divcomment" />Comment
+        <input type="radio" name="fileorcomment" value="divfile" />File
+        </p>
+    </div>
+    
+    <div id="divcomment">
+        <p>
+        <form id="formcomment">
+        <table>
+            <tr>
+                <td>Comment:</td>
+                <td><textarea name="task_comment_text" id="task_comment_text" rows="5" cols="50"></textarea></td>
+            </tr>
+        </table>
+        <input type="submit" value="Post a Comment" />
+        </form>
+        </P>
+    </div>
+    
+    
+    <div id="divfile">
+        <p>
+            <form id="formfile">
+            <table>
+                <tr>
+                    <td>File Name:</td>
+                    <td><input type="text" name="file_name" id="file_name" /><br></td>
+                </tr>
+                <tr>
+                    <td>Description:</td>
+                    <td><textarea name="description" id="description" rows="5" cols="50"></textarea><br></td>
+                </tr>
+                </table>
+            </form>
+        </p>
+        <div id="divfileupload">
+        </div>
+    </div>
+    
+    
+    
+    
+    <script>        
+        function createUploader(){            
+            var uploader = new qq.FileUploader({
+                element: document.getElementById('divfileupload'),
+                action: '{{=URL('upload_to_task_ajax',args=task_id)}}',
+                debug: true,
+                onSubmit: function(id, fileName){
+                    uploader.setParams({
+                        file_name: jQuery('#file_name').val(),
+                        description: jQuery('#description').val(),                          
+                    });
+                    resetForm($('#formfile'));
+                    jQuery.get('{{=URL('show_task_files', args=task_id)}}', function (data) {
+                               jQuery('#show_task_files').replaceWith(data);
+                               })
+                }
+            });           
+        }
+        
+        // in your app create uploader as soon as the DOM is ready
+        // do not wait for the window to load  
+        window.onload = createUploader;     
+    </script>  
+    
+    <script>
+        function resetForm($form) {
+            $form.find('input:text, input:password, input:file, select, textarea').val('');
+            $form.find('input:radio, input:checkbox').removeAttr('checked').removeAttr('selected');
+        }
+    </script>
+    
+    
+    
+    
+   
+    <br>
+   
+    <!-- include all files that have given this task access to -->
+    <div class=title><h2>Files:</h2></div>
+    <div id="show_task_files">
+        <p>
+        {{if 'my_uploads' in globals():}}
+            {{include 'default/show_task_files.html'}}
+        {{pass}}
+        </P>
+    </div>
+    <br>
+        
     <!-- include all comments that have been made about this task -->
-    <p>
-    {{if 'comments' in globals():}} 
-        {{include 'default/show_task_comment.html'}}
-    {{pass}}
-    </p>
+    <div class=title><h2>Comments:</h2></div>
+    <div id="show_task_comment">
+        <p>
+        {{if 'comments' in globals():}} 
+            {{include 'default/show_task_comment.html'}}
+        {{pass}}
+        </p>
+    </div>
 {{pass}}

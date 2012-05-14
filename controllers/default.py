@@ -19,6 +19,8 @@ def error():
     """
     return locals()
     
+
+    
 #FILE SHARING SECTION
         
 @auth.requires_login()
@@ -57,6 +59,49 @@ def upload_to_task():
         if form.accepted:
             session.flash = "Your file was uploaded"
             redirect(URL('task',args=task_id))
+    return locals()
+    
+    
+@auth.requires_login()
+def upload_to_task_ajax():
+    """
+    Allows authenticated user to upload a file to a specified task.
+    Uploaded files generate a link that enables the user to share the file.
+    """
+    allowed_access = False
+    task_id = request.args(0)
+    task = db.task(id=task_id) or redirect(URL('error'))
+    if (task.created_by==auth.user.id or task.assigned_to==auth.user.email):
+        db.file_share.access_permitted_to.readable=False
+        db.file_share.access_permitted_to.writable=False
+        db.file_share.access_permitted_to_tasks.readable=False
+        db.file_share.access_permitted_to_tasks.writable=False
+        db.file_share.access_permitted_to_tasks.default=task_id
+        form = SQLFORM(db.file_share)
+        allowed_access = True
+        variables = request.vars
+        db.file_share.insert(file_name=variables.file_name,
+                         description=variables.description,
+                         file=variables.qqfile)
+        return "{success:true}"
+    else:
+        return DIV("You do not have authorization to post to this task.")
+
+@auth.requires_login()
+def show_task_files():
+    """
+    Pulls files associated with a task.
+    URL must include the id of the task as an arg
+    """
+    allowed_access = False
+    task_id = request.args(0)
+    task = db.task(id=task_id) or redirect(URL('error'))
+    if (task.created_by==auth.user.id or task.assigned_to==auth.user.email):
+        my_uploads = db(db.file_share.access_permitted_to_tasks.contains(task_id)).select(db.file_share.ALL,    
+                    orderby=~db.file_share.posted_on)
+        allowed_access = True      
+    else:
+        message = "You do not have access to this task."
     return locals()
 
 @auth.requires_login()
@@ -182,7 +227,7 @@ def add_task():
 def task():
     """
     Allows viewing task details and allows downloading a task.
-    URL must include the id of the file as an arg
+    URL must include the id of the task as an arg
     """
     allowed_access = False
     task_id = request.args(0)
@@ -196,6 +241,23 @@ def task():
     else:
         message = "You do not have access to this task."
     return locals()
+    
+@auth.requires_login()
+def show_task_comment():
+    """
+    Pulls comments associated with a task.
+    URL must include the id of the task as an arg
+    """
+    allowed_access = False
+    task_id = request.args(0)
+    task = db.task(id=task_id) or redirect(URL('error'))
+    if (task.created_by==auth.user.id or task.assigned_to==auth.user.email):
+        comments = db(db.task_comment.tc_response_to==task_id).select()
+        allowed_access = True      
+    else:
+        message = "You do not have access to this task."
+    return locals()
+    
 
 @auth.requires_login()
 def update_task():
@@ -298,6 +360,26 @@ def task_comment():
             session.flash = "Your comment was posted"
             redirect(URL('task',args=task_id))
     return locals()
+
+            
+@auth.requires_login()
+def  task_comment_ajax():
+    """
+    Allows user to comment on an task.  
+    URL must include the id of the file as an arg.
+    """
+    allowed_access = False
+    task_id = request.args(0)
+    task = db.task(id=task_id) or redirect(URL('error'))
+    if (task.created_by==auth.user.id or task.assigned_to==auth.user.email):
+        tasks = db(db.task.id==task.id).select()
+        db.task_comment.tc_response_to.default = task_id
+        form = SQLFORM(db.task_comment)
+        allowed_access = True
+        if form.accepts(request,formname=None):
+            return DIV("Your Comment was Posted.")
+    else: 
+        return DIV("You do not have authorization to post to this task.")
 
 
 def user():

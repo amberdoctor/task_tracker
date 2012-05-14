@@ -1,7 +1,7 @@
 import time
 while True:
     ## set the query up to find emails that haven't been send and that have a send date that has past
-    query = db.email.sent_on==None&(db.email.email_send_date < request.now)
+    query = (db.email.sent_on==None)&(db.email.email_send_date < request.now)
     ## grab the next email to send
     next_email = db(query).select().first()
     ## check if there is an email to send
