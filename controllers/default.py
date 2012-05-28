@@ -167,11 +167,6 @@ def comment():
 
 
 
-
-
-
-
-
 # TASK SECTION
 
 @auth.requires_login()
@@ -380,6 +375,104 @@ def  task_comment_ajax():
             return DIV("Your Comment was Posted.")
     else: 
         return DIV("You do not have authorization to post to this task.")
+
+
+
+##Web services section
+@auth.requires_login()
+@request.restful()
+def task_web_services():
+    """
+    Exposes get based web services: json, rss, xml
+    """
+    def GET():
+        response.generic_patterns=['*']
+        query = (db.task.assigned_to==auth.user.email)|(db.task.created_by==auth.user.id)
+        tasks = db(query).select()
+        tasks_dict = [dict(title=task.short_description, 
+                            link=URL('task', host=host_defined, scheme='https', args=task.id), 
+                            description=task.full_description) 
+                            for task in tasks] 
+        r = dict(title='TaskTracker3',
+                link = URL('index', host=host_defined, scheme='https'),
+                description = 'Task Tracker 3 Tasks',
+                created_on = request.now,
+                items=tasks_dict)
+        return r
+    """
+    Exposes post based web services: xml, json
+    """
+    def POST(short_description,full_description,assigned_to,status,progress,due_date):
+        id = db.task.insert(short_description=short_description,
+                                full_description=full_description,
+                                created_by=auth.user_id,
+                                assigned_to=assigned_to,
+                                status=status,
+                                progress=progress,
+                                due_date=due_date)
+        return dict(id=id)
+    return locals()
+
+
+"""
+Imports for web services and web service call definitions
+"""
+from gluon.tools import Service
+service = Service(globals())
+private_service = Service(globals())
+
+
+@auth.requires_login()
+def call():
+    """
+    defines call for xmlrpc
+    """
+    return service()
+
+@auth.requires_login()   
+def private_call(): 
+    """
+    defines private call
+    """
+    return private_service()
+    
+
+@private_service.xmlrpc
+def task_web_services_xmlrpc(short_description,full_description,assigned_to,status,progress,due_date):
+    """
+    exposes web services: xmlrpc
+    """
+    id = db.task.insert(short_description=short_description,
+                                full_description=full_description,
+                                created_by=auth.user_id,
+                                assigned_to=assigned_to,
+                                status=status,
+                                progress=progress,
+                                due_date=due_date)
+    return dict(id=str(id))
+    
+
+@auth.requires_login()
+def task_web_services_ics():
+    """
+    exposes web services: ics
+    """    
+    response.view = 'generic.ics'
+    query = (db.task)
+    tasks = db(query).select()				
+    event_tasks_dict = ((dict(id=task.id,
+						title=task.short_description,
+						#link=URL('task', host=host_defined, scheme='https', args=task.id),
+                        start_datetime=task.due_date,
+                        stop_datetime=task.due_date)) 
+                        for task in tasks)	
+    r = dict(events=event_tasks_dict,
+            title = 'TaskTracker3',
+            link = '',
+            timeshift = 0)
+    return r
+    
+
 
 
 def user():

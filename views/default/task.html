@@ -3,7 +3,7 @@
 <link href="{{=URL('static', 'ajax_upload/fileuploader.css')}}" rel="stylesheet" type="text/css">
 <script src="{{=URL('static', 'ajax_upload/fileuploader.js')}}" type="text/javascript"></script>
 
-
+<!--- handles hiding showing and processing the comments and hiding showing of file--->
 <script>
     jQuery(document).ready(function(){
         jQuery('#divcomment').hide();
@@ -97,7 +97,7 @@
     
     
     
-    
+    <!--- handles the uploading of a file --->
     <script>        
         function createUploader(){            
             var uploader = new qq.FileUploader({
@@ -122,6 +122,7 @@
         window.onload = createUploader;     
     </script>  
     
+	<!--- handles the clearing of forms --->
     <script>
         function resetForm($form) {
             $form.find('input:text, input:password, input:file, select, textarea').val('');

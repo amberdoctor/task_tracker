@@ -1,6 +1,6 @@
 # coding: utf8
 ## Define a server variable
-host_defined = 'mdp.cti.depaul.edu:8000'
+host_defined = '127.0.0.1:8000' ##'mdp.cti.depaul.edu:8000'
 
 ## Define a table for tasks
 db.define_table(
@@ -14,6 +14,14 @@ db.define_table(
         Field('date_created', 'datetime', default=request.now, readable=False, writable=False),
         Field('due_date', 'datetime'),
         format='%(short_description)s')
+		
+## Define a table for events
+db.define_table(
+		'event',
+		Field('title'),
+		Field('start_datetime','datetime'),
+		Field('stop_datetime','datetime')
+		)
     
 ## Define a table for comments about tasks
 db.define_table(
